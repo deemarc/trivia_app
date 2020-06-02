@@ -8,7 +8,6 @@ class CategoryResource(Resource):
         error = False
         try:
             categories = Category.query.all()
-            print('done')
             data = [item.format() for item in categories]
         except:
             error = True

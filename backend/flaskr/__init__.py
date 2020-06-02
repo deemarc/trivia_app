@@ -7,8 +7,9 @@ from flask_restful import Api, Resource
 
 from models import setup_db, Question, Category
 from flaskr.resources.catagory import CategoryResource
+from flaskr.resources.question import *
 
-QUESTIONS_PER_PAGE = 10
+
 
 
 
@@ -40,7 +41,7 @@ def create_app(test_config=None):
 
 
   '''
-  @TODO: 
+  @Done: 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
@@ -48,7 +49,7 @@ def create_app(test_config=None):
 
 
   '''
-  @TODO: 
+  @DONE: 
   Create an endpoint to handle GET requests for questions, 
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
@@ -59,17 +60,19 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
+  api.add_resource(QuestionResource, '/questions')
 
   '''
-  @TODO: 
+  @DONE: 
   Create an endpoint to DELETE question using a question ID. 
 
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  api.add_resource(QuestionId, '/questions/<int:id>')
 
   '''
-  @TODO: 
+  @DONE: 
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
@@ -78,9 +81,9 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
-
+  api.add_resource(QuestionSearch, '/questions/search')
   '''
-  @TODO: 
+  @DONE: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -113,10 +116,39 @@ def create_app(test_config=None):
   '''
 
   '''
-  @TODO: 
+  @DONE: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
-  
+  @app.errorhandler(404)
+  def not_found(error):
+      return jsonify({
+          "success": False,
+          "error": 404,
+          "message": "resource not found"
+      }), 404
+
+  @app.errorhandler(422)
+  def unprocessable(error):
+      return jsonify({
+          "success": False,
+          "error": 422,
+          "message": "unprocessable"
+      }), 422
+
+  @app.errorhandler(400)
+  def bad_request(error):
+      return jsonify({
+          "success": False,
+          "error": 400,
+          "message": "bad request"
+      }), 400
+  @app.errorhandler(500)
+  def bad_request(error):
+      return jsonify({
+          "success": False,
+          "error": 500,
+          "message": "Internal Server Error"
+      }), 500
   return app
 
