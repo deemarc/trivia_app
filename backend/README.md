@@ -129,7 +129,7 @@ The API will return three types of errors:
 
 ### Endpoints
 
-#### GET /
+#### GET /categories
 * General: Returns a list categories.
 * Sample: `curl http://127.0.0.1:5000/categories`<br>
   
@@ -256,13 +256,11 @@ The API will return three types of errors:
 
 #### POST /questions
 
-This endpoint either creates a new question or returns search results.
-
-1. If <strong>no</strong> search term is included in request:
-
 * General:
   * Creates a new question using JSON request parameters.
   * Returns JSON object with newly created question, as well as paginated questions.
+* Param:
+  * **category_id** : filter question within the given category. return all question in all categories if this param is not given.
 * Sample: `curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{
             "question": "Which US state contains an area known as the Upper Penninsula?",
             "answer": "Michigan",
@@ -347,15 +345,20 @@ This endpoint either creates a new question or returns search results.
             ], 
             "success": true, 
             "total_questions": 20
+            "current_category": "all"
         }
 
+#### POST /questions/search
 
-2. If search term <strong>is</strong> included in request:
+This endpoint either creates a new question or returns search results.
 
 * General:
   * Searches for questions using search term in JSON request parameters.
   * Returns JSON object with paginated matching questions.
-* Sample: `curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm": "which"}'`<br>
+* Param:
+  * **searchTerm** : search string. It can be partial and it is case-insenstive
+  
+* Sample: `curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: application/json" -d '{"searchTerm": "which"}'`<br>
 
         {
             "questions": [
@@ -420,48 +423,14 @@ This endpoint either creates a new question or returns search results.
             "total_questions": 18
         }
 
-#### GET /categories/\<int:id\>/questions
-
-* General:
-  * Gets questions by category id using url parameters.
-  * Returns JSON object with paginated matching questions.
-* Sample: `curl http://127.0.0.1:5000/categories/1/questions`<br>
-
-        {
-            "current_category": "Science", 
-            "questions": [
-                {
-                    "answer": "The Liver", 
-                    "category": 1, 
-                    "difficulty": 4, 
-                    "id": 20, 
-                    "question": "What is the heaviest organ in the human body?"
-                }, 
-                {
-                    "answer": "Alexander Fleming", 
-                    "category": 1, 
-                    "difficulty": 3, 
-                    "id": 21, 
-                    "question": "Who discovered penicillin?"
-                }, 
-                {
-                    "answer": "Blood", 
-                    "category": 1, 
-                    "difficulty": 4, 
-                    "id": 22, 
-                    "question": "Hematology is a branch of medicine involving the study of what?"
-                }
-            ], 
-            "success": true, 
-            "total_questions": 18
-        }
 
 #### POST /quizzes
 
 * General:
   * Allows users to play the quiz game.
   * Uses JSON request parameters of category and previous questions.
-  * Returns JSON object with random question not among previous questions.
+  * Returns JSON object with random question. The questions the is listed in previous_questions will be exclude from quesiton list to be random
+  
 * Sample: `curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"previous_questions": [20, 21],
                                             "quiz_category": {"type": "Science", "id": "1"}}'`<br>
 

@@ -54,6 +54,27 @@ class TriviaTestCase(unittest.TestCase):
         # maximum question in one page is 10
         if data['total_questions'] > 10:
             self.assertTrue(len(data['questions'])<=10)
+    
+    def test_get_questions_with_category(self):
+
+        category_id = 1
+        # get response and load data
+        response = self.client().get(f'/questions?category_id={category_id}')
+        data = json.loads(response.data)
+        # check status code and message
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        if response.status_code == 200:
+            for question in data['questions']:
+                self.assertEqual(question['category'],category_id)
+
+        
+
+        # ---- check if the pagination is working correctly or not
+        
+        # maximum question in one page is 10
+        if data['total_questions'] > 10:
+            self.assertTrue(len(data['questions'])<=10)
 
     def test_get_catagories(self):
         # print("****** runtest test_get_questions")
@@ -133,20 +154,24 @@ class TriviaTestCase(unittest.TestCase):
     def test_b_test_search_question(self):
         # print("****** runtest test_b_test_search_question")
         if not self.cur_question_id:
-            response = self.client().post(f'/questions/search?search_term={self.question_str}')
+            data = {}
+            data['searchTerm'] = self.question_str
+            response = self.client().post(f'/questions/search', json=data)
             data = json.loads(response.data)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(data['success'], True)
-            self.assertGreater(data['total_matched_questions'],0)
+            self.assertGreater(data['totalQuestions'],0)
         else:
             self.assertIsNotNone(self.cur_question_id)
         
     def test_c_test_get_question(self):
         # print("****** runtest test_c_test_get_question")
-        response = self.client().post(f'/questions/search?search_term={self.question_str}')
+        data = {}
+        data['searchTerm'] = self.question_str
+        response = self.client().post(f'/questions/search', json=data)
         data = json.loads(response.data)
         if response.status_code == 200:
-            question_id = data['matched_questions'][0]['id']
+            question_id = data['questions'][0]['id']
             # print(f"question_id:{question_id}")
             response = self.client().get(f'/questions/{question_id}')
             data = json.loads(response.data)
@@ -158,10 +183,12 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_d_test_delete_question(self):
         # print("****** runtest test_c_test_get_question")
-        response = self.client().post(f'/questions/search?search_term={self.question_str}')
+        data = {}
+        data['searchTerm'] = self.question_str
+        response = self.client().post(f'/questions/search', json=data)
         data = json.loads(response.data)
         if response.status_code == 200:
-            question_id = data['matched_questions'][0]['id']
+            question_id = data['questions'][0]['id']
             print(f"question_id:{question_id}")
             response = self.client().delete(f'/questions/{question_id}')
             data = json.loads(response.data)
@@ -188,6 +215,19 @@ class TriviaTestCase(unittest.TestCase):
         # check status code and message
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
+    
+    def test_post_quiz(self):
+        category_id = 2
+        data = {}
+        data['quiz_category'] = {'id':category_id}
+        data['previous_questions'] = []
+        response = self.client().post('/quizzes', json=data)
+        data = json.loads(response.data)
+        # check status code and message
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertIsNotNone(data.get('question',None))
+
 
 
 

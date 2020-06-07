@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from models import db, Question
+from models import db, Question, Category
 from flask import current_app, abort, jsonify,request
 import sys
 from flaskr.dataproc import paginate, check_require,error_data, make_response, error_response
@@ -7,14 +7,32 @@ from flaskr.dataproc import paginate, check_require,error_data, make_response, e
 class QuestionResource(Resource):
     def get(self):
         error = False
+        category_id = request.args.get('category_id', type = int, default = None)
+        current_app.logger.info(f"category_id param value:{category_id}")
         try:
-            questions = Question.query.order_by(Question.id).all()
+            # get catagories
+            categories = Category.query.all()
+            categories_dict = {}
+            for category in categories:
+                categories_dict[category.id] = category.type
+
+            # get question
+            if not category_id:
+                questions = Question.query.order_by(Question.id).all()
+                current_category = "all"
+            else:
+                questions = Question.query.order_by(Question.id).filter_by(category=category_id).all()
+                current_category = categories_dict[category_id]
+            
             data = [item.format() for item in questions]
             current_page_data = paginate(request, data)
             if not current_page_data:
                 # response = make_response(error_data(404,"User give an invalid page number"),404)
                 return error_response(404,"User give an invalid page number")
-
+            
+            
+            # cat_data = [item.format() for item in categories]
+            # current_type = cat_data[0]['id']
             # if not current_page_data:
             #     return json_abort(404,"User give an invalid page number")
         except:
@@ -31,7 +49,9 @@ class QuestionResource(Resource):
         return jsonify({
             'success': True,
             'questions': current_page_data,
-            'total_questions':len(data)
+            'total_questions':len(data),
+            'categories': categories_dict,
+            'current_category': current_category
         })
 
     def post(self):
@@ -122,15 +142,26 @@ class QuestionId(Resource):
 class QuestionSearch(Resource):
     def post(self):
         error = False
+        json = request.get_json()
+        
+        if json:
+            search_term = json.get("searchTerm","")
+        else:
+            search_term = ""
 
-        # incomping param
-        req_dict = request.args.to_dict()
-
-        search_str = req_dict.get("search_term","")
-        looking_for = f"%{search_str}%"
+        looking_for = f"%{search_term}%"
+        print(f"search_term:{looking_for}")
 
         try:
-            questions = Question.query.filter(Question.question.ilike(looking_for))
+             # get catagories
+            categories = Category.query.all()
+            categories_dict = {}
+            for category in categories:
+                categories_dict[category.id] = category.type
+
+            # questions = Question.query.filter(Question.question.ilike(looking_for)).all()
+            questions = Question.query.filter(
+                Question.question.ilike(looking_for)).all()
             data = [item.format() for item in questions]
             print(data)
             current_page_data = paginate(request, data)
@@ -147,6 +178,8 @@ class QuestionSearch(Resource):
 
         return jsonify({
             'success': True,
-            'matched_questions': current_page_data,
-            'total_matched_questions':len(data)
+            'categories': categories_dict,
+            'questions': current_page_data,
+            'totalQuestions':len(data),
+            'current_category':'all'
         })

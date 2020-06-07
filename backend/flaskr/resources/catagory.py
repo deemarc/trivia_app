@@ -7,8 +7,11 @@ class CategoryResource(Resource):
     def get(self):
         error = False
         try:
+            # get catagories
             categories = Category.query.all()
-            data = [item.format() for item in categories]
+            categories_dict = {}
+            for category in categories:
+                categories_dict[category.id] = category.type
         except:
             error = True
             db.session.rollback()
@@ -22,5 +25,5 @@ class CategoryResource(Resource):
         
         return jsonify({
             'success': True,
-            'categories': data
+            'categories': categories_dict
         })

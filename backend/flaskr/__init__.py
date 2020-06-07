@@ -8,6 +8,7 @@ from flask_restful import Api, Resource
 from models import setup_db, Question, Category
 from flaskr.resources.catagory import CategoryResource
 from flaskr.resources.question import *
+from flaskr.resources.quiz import QuizeResource
 
 
 
@@ -94,7 +95,7 @@ def create_app(test_config=None):
   '''
 
   '''
-  @TODO: 
+  @Done: 
   Create a GET endpoint to get questions based on category. 
 
   TEST: In the "List" tab / main screen, clicking on one of the 
@@ -114,7 +115,7 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
-
+  api.add_resource(QuizeResource, '/quizzes')
   '''
   @DONE: 
   Create error handlers for all expected errors 

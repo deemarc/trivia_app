@@ -10,7 +10,7 @@ def paginate(request, data):
         return []
     current_app.logger.info(f"start index:{start} end index: {end}")
     if start == end:
-        current_data = data[start]
+        current_data = [data[start]]
     else:
         current_data = data[start:end]
 
